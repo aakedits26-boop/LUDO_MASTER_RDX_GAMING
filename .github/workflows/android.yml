@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get repository
+      - name: Get project
         uses: actions/checkout@v4
 
-      - name: Extract Ludo project
+      - name: Extract project
         run: |
           mkdir app
           unzip -o Ludo-Master-RDX-Gaming-Android.zip -d app
@@ -21,21 +21,27 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: Install packages
         working-directory: app
         run: npm install
+
+      - name: Install Android platform
+        working-directory: app
+        run: npm install @capacitor/android@7.4.3
 
       - name: Create Android project
         working-directory: app
         run: npx cap add android
 
-      - name: Sync Android
-        working-directory: app
-        run: npx cap sync android
-
       - name: Build APK
-        working-directory: app/android
-        run: ./gradlew assembleDebug
+        working-directory: app
+        run: npm run build && npx cap sync android && cd android && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
